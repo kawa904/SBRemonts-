@@ -1,0 +1,498 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SBRemonts | Автосервис в Риге</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        /* Основные стили */
+        :root {
+            --primary: #4361ee;
+            --secondary: #3a0ca3;
+            --accent: #f72585;
+            --light: #f8f9fa;
+            --dark: #212529;
+            --gray: #6c757d;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 20px; min-height: 100vh; }
+        .container { max-width: 500px; margin: 0 auto; background: white; border-radius: 25px; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.3); position: relative; }
+        
+        /* Языковой переключатель */
+        .language-switcher {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 100;
+            display: flex;
+            gap: 8px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px 12px;
+            border-radius: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .lang-btn {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s;
+        }
+        
+        .lang-btn:hover {
+            background: rgba(67, 97, 238, 0.1);
+            transform: scale(1.1);
+        }
+        
+        .lang-btn.active {
+            background: var(--primary);
+            color: white;
+            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+        }
+        
+        /* Шапка */
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 40px 25px 30px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .logo {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 10px;
+        }
+        
+        .logo i {
+            font-size: 32px;
+        }
+        
+        .logo h1 {
+            font-size: 28px;
+            font-weight: 700;
+        }
+        
+        .tagline {
+            opacity: 0.9;
+            font-size: 16px;
+            margin-top: 5px;
+        }
+        
+        /* Основной контент */
+        .main-content {
+            padding: 25px;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            margin-bottom: 25px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .card h2 {
+            color: var(--dark);
+            margin-bottom: 15px;
+            font-size: 22px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .card p {
+            color: var(--gray);
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        
+        /* Кнопки */
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 18px 30px;
+            border-radius: 15px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 10px 25px rgba(67, 97, 238, 0.3);
+        }
+        
+        /* Услуги */
+        .services-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-top: 20px;
+        }
+        
+        .service-item {
+            text-align: center;
+            padding: 20px 15px;
+            background: var(--light);
+            border-radius: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .service-item:hover {
+            transform: translateY(-5px);
+            background: white;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .service-item i {
+            font-size: 32px;
+            color: var(--primary);
+            margin-bottom: 10px;
+        }
+        
+        .service-item h3 {
+            font-size: 16px;
+            margin-bottom: 5px;
+            color: var(--dark);
+        }
+        
+        .service-item p {
+            color: var(--accent);
+            font-weight: 700;
+            font-size: 18px;
+            margin: 0;
+        }
+        
+        /* Контакты */
+        .contact-item {
+            display: flex;
+            align-items: flex-start;
+            gap: 15px;
+            margin-bottom: 20px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .contact-item:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        
+        .contact-item i {
+            font-size: 24px;
+            color: var(--primary);
+            margin-top: 5px;
+        }
+        
+        .contact-item h3 {
+            font-size: 16px;
+            color: var(--dark);
+            margin-bottom: 5px;
+        }
+        
+        .contact-item p {
+            color: var(--gray);
+            margin: 0;
+            line-height: 1.4;
+        }
+        
+        /* Футер */
+        .footer {
+            text-align: center;
+            padding: 25px;
+            background: var(--light);
+            color: var(--gray);
+            font-size: 14px;
+        }
+        
+        .footer-links {
+            margin-top: 15px;
+        }
+        
+        .footer-links a {
+            color: var(--primary);
+            text-decoration: none;
+            font-weight: 600;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        /* Адаптивность */
+        @media (max-width: 480px) {
+            .container { border-radius: 15px; }
+            .header { padding: 35px 20px 25px; }
+            .main-content { padding: 20px; }
+            .services-grid { grid-template-columns: 1fr; }
+            .language-switcher { top: 15px; right: 15px; padding: 6px 10px; }
+            .lang-btn { width: 32px; height: 32px; font-size: 18px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Языковой переключатель -->
+        <div class="language-switcher">
+            <button class="lang-btn active" data-lang="ru" title="Русский">🇷🇺</button>
+            <button class="lang-btn" data-lang="lv" title="Latviešu">🇱🇻</button>
+            <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
+        </div>
+
+        <!-- Шапка -->
+        <header class="header">
+            <div class="logo">
+                <i class="fas fa-car"></i>
+                <h1 id="app-title">SBRemonts</h1>
+            </div>
+            <p class="tagline" id="app-subtitle">Профессиональный автосервис в Риге</p>
+        </header>
+
+        <!-- Основной контент -->
+        <main class="main-content">
+            <!-- Карточка записи -->
+            <section class="card booking-card">
+                <h2><i class="fas fa-calendar-alt"></i> <span id="booking-title">Онлайн-запись</span></h2>
+                <p id="booking-description">Выберите услугу и удобное время для визита в сервис</p>
+                <button class="btn-primary" onclick="window.location.href='booking.html'">
+                    <i class="fas fa-pencil-alt"></i> <span id="booking-button">Записаться онлайн</span>
+                </button>
+            </section>
+
+            <!-- Услуги -->
+            <section class="card services-card">
+                <h2><i class="fas fa-tools"></i> <span id="services-title">Наши услуги</span></h2>
+                <div class="services-grid">
+                    <div class="service-item">
+                        <i class="fas fa-search"></i>
+                        <h3 id="service-diagnostics">Диагностика</h3>
+                        <p id="price-diagnostics">от 20€</p>
+                    </div>
+                    <div class="service-item">
+                        <i class="fas fa-oil-can"></i>
+                        <h3 id="service-oil">Замена масла</h3>
+                        <p id="price-oil">от 30€</p>
+                    </div>
+                    <div class="service-item">
+                        <i class="fas fa-brake-warning"></i>
+                        <h3 id="service-brakes">Тормозная система</h3>
+                        <p id="price-brakes">от 40€</p>
+                    </div>
+                    <div class="service-item">
+                        <i class="fas fa-car-side"></i>
+                        <h3 id="service-suspension">Подвеска</h3>
+                        <p id="price-suspension">от 50€</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Контакты -->
+            <section class="card contacts-card">
+                <h2><i class="fas fa-address-book"></i> <span id="contacts-title">Контакты</span></h2>
+                <div class="contact-item">
+                    <i class="fas fa-map-marker-alt"></i>
+                    <div>
+                        <h3 id="address-title">Адрес</h3>
+                        <p id="address-text">Рига, ул. Автосервисная, 123</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <div>
+                        <h3 id="phone-title">Телефон</h3>
+                        <p id="phone-text">+371 1234 5678</p>
+                    </div>
+                </div>
+                <div class="contact-item">
+                    <i class="fas fa-clock"></i>
+                    <div>
+                        <h3 id="hours-title">Время работы</h3>
+                        <p id="hours-text">Пн-Пт: 9:00-18:00<br>Сб: 10:00-16:00</p>
+                    </div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Футер -->
+        <footer class="footer">
+            <p id="footer-text">© 2024 SBRemonts. Все права защищены.</p>
+            <p><i class="fab fa-telegram"></i> <span id="bot-link">Наш бот: @sbremonts_bot</span></p>
+        </footer>
+    </div>
+
+    <!-- Тексты на разных языках -->
+    <script>
+        // Словарь переводов
+        const translations = {
+            ru: {
+                appTitle: "SBRemonts",
+                appSubtitle: "Профессиональный автосервис в Риге",
+                bookingTitle: "Онлайн-запись",
+                bookingDescription: "Выберите услугу и удобное время для визита в сервис",
+                bookingButton: "Записаться онлайн",
+                servicesTitle: "Наши услуги",
+                serviceDiagnostics: "Диагностика",
+                serviceOil: "Замена масла",
+                serviceBrakes: "Тормозная система",
+                serviceSuspension: "Подвеска",
+                priceDiagnostics: "от 20€",
+                priceOil: "от 30€",
+                priceBrakes: "от 40€",
+                priceSuspension: "от 50€",
+                contactsTitle: "Контакты",
+                addressTitle: "Адрес",
+                addressText: "Рига, ул. Автосервисная, 123",
+                phoneTitle: "Телефон",
+                phoneText: "+371 1234 5678",
+                hoursTitle: "Время работы",
+                hoursText: "Пн-Пт: 9:00-18:00<br>Сб: 10:00-16:00",
+                footerText: "© 2024 SBRemonts. Все права защищены.",
+                botLink: "Наш бот: @sbremonts_bot"
+            },
+            lv: {
+                appTitle: "SBRemonts",
+                appSubtitle: "Profesionāls auto serviss Rīgā",
+                bookingTitle: "Tiešsaistes pieraksts",
+                bookingDescription: "Izvēlieties pakalpojumu un ērtu laiku apmeklējumam servisā",
+                bookingButton: "Pieteikties tiešsaistē",
+                servicesTitle: "Mūsu pakalpojumi",
+                serviceDiagnostics: "Diagnostika",
+                serviceOil: "Eļļas maiņa",
+                serviceBrakes: "Bremžu sistēma",
+                serviceSuspension: "Piekare",
+                priceDiagnostics: "no 20€",
+                priceOil: "no 30€",
+                priceBrakes: "no 40€",
+                priceSuspension: "no 50€",
+                contactsTitle: "Kontakti",
+                addressTitle: "Adrese",
+                addressText: "Rīga, Auto servisa iela, 123",
+                phoneTitle: "Telefons",
+                phoneText: "+371 1234 5678",
+                hoursTitle: "Darba laiks",
+                hoursText: "P.-Pk.: 9:00-18:00<br>S.: 10:00-16:00",
+                footerText: "© 2024 SBRemonts. Visas tiesības aizsargātas.",
+                botLink: "Mūsu bots: @sbremonts_bot"
+            },
+            en: {
+                appTitle: "SBRemonts",
+                appSubtitle: "Professional auto service in Riga",
+                bookingTitle: "Online booking",
+                bookingDescription: "Choose a service and convenient time for a visit to the service center",
+                bookingButton: "Book online",
+                servicesTitle: "Our services",
+                serviceDiagnostics: "Diagnostics",
+                serviceOil: "Oil change",
+                serviceBrakes: "Brake system",
+                serviceSuspension: "Suspension",
+                priceDiagnostics: "from 20€",
+                priceOil: "from 30€",
+                priceBrakes: "from 40€",
+                priceSuspension: "from 50€",
+                contactsTitle: "Contacts",
+                addressTitle: "Address",
+                addressText: "Riga, Auto service street, 123",
+                phoneTitle: "Phone",
+                phoneText: "+371 1234 5678",
+                hoursTitle: "Working hours",
+                hoursText: "Mon-Fri: 9:00-18:00<br>Sat: 10:00-16:00",
+                footerText: "© 2024 SBRemonts. All rights reserved.",
+                botLink: "Our bot: @sbremonts_bot"
+            }
+        };
+
+        // Текущий язык
+        let currentLang = 'ru';
+
+        // Функция смены языка
+        function changeLanguage(lang) {
+            currentLang = lang;
+            
+            // Обновляем активную кнопку
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.classList.remove('active');
+                if (btn.dataset.lang === lang) {
+                    btn.classList.add('active');
+                }
+            });
+            
+            // Получаем переводы
+            const t = translations[lang];
+            
+            // Обновляем все тексты
+            document.getElementById('app-title').textContent = t.appTitle;
+            document.getElementById('app-subtitle').textContent = t.appSubtitle;
+            document.getElementById('booking-title').textContent = t.bookingTitle;
+            document.getElementById('booking-description').textContent = t.bookingDescription;
+            document.getElementById('booking-button').textContent = t.bookingButton;
+            document.getElementById('services-title').textContent = t.servicesTitle;
+            document.getElementById('service-diagnostics').textContent = t.serviceDiagnostics;
+            document.getElementById('service-oil').textContent = t.serviceOil;
+            document.getElementById('service-brakes').textContent = t.serviceBrakes;
+            document.getElementById('service-suspension').textContent = t.serviceSuspension;
+            document.getElementById('price-diagnostics').textContent = t.priceDiagnostics;
+            document.getElementById('price-oil').textContent = t.priceOil;
+            document.getElementById('price-brakes').textContent = t.priceBrakes;
+            document.getElementById('price-suspension').textContent = t.priceSuspension;
+            document.getElementById('contacts-title').textContent = t.contactsTitle;
+            document.getElementById('address-title').textContent = t.addressTitle;
+            document.getElementById('address-text').innerHTML = t.addressText;
+            document.getElementById('phone-title').textContent = t.phoneTitle;
+            document.getElementById('phone-text').textContent = t.phoneText;
+            document.getElementById('hours-title').textContent = t.hoursTitle;
+            document.getElementById('hours-text').innerHTML = t.hoursText;
+            document.getElementById('footer-text').textContent = t.footerText;
+            document.getElementById('bot-link').textContent = t.botLink;
+            
+            // Сохраняем в localStorage
+            localStorage.setItem('sbremonts_lang', lang);
+        }
+
+        // Инициализация при загрузке
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем сохраненный язык
+            const savedLang = localStorage.getItem('sbremonts_lang') || 'ru';
+            changeLanguage(savedLang);
+            
+            // Вешаем обработчики на кнопки языков
+            document.querySelectorAll('.lang-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    changeLanguage(this.dataset.lang);
+                });
+            });
+            
+            // Telegram Web App
+            if (typeof Telegram !== 'undefined') {
+                const tg = Telegram.WebApp;
+                tg.expand();
+                tg.ready();
+            }
+        });
+    </script>
+</body>
+</html>
