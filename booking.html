@@ -476,96 +476,159 @@
             selectedTime = null;
         }
 
-        // Отправка формы
-        async function submitBooking() {
-            const t = bookingTranslations[currentLang];
-            const service = document.getElementById('service').value;
-            const date = document.getElementById('date').value;
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const car = document.getElementById('car').value.trim();
-            
-            // Валидация
-            if (!service || !date || !selectedTime || !name || !phone || !car) {
-                showError(t.errorMessage);
-                return;
+       
+   // НОВАЯ ФУНКЦИЯ отправки с подтверждением
+async function submitBooking() {
+    console.log('=== НАЧАЛО ОТПРАВКИ ===');
+    
+    const t = bookingTranslations[currentLang];
+    const service = document.getElementById('service').value;
+    const date = document.getElementById('date').value;
+    const name = document.getElementById('name').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const car = document.getElementById('car').value.trim();
+    
+    console.log('📋 Данные формы:', { service, date, name, phone, car, selectedTime });
+    
+    // Валидация
+    if (!service || !date || !selectedTime || !name || !phone || !car) {
+        console.log('❌ Ошибка валидации: не все поля заполнены');
+        showError(t.errorMessage);
+        return;
+    }
+    
+    // Получаем название услуги
+    const serviceName = document.getElementById('service').options[document.getElementById('service').selectedIndex].text;
+    
+    // Формируем данные для отправки
+    const bookingData = {
+        action: 'web_booking',
+        lang: currentLang,
+        data: {
+            service: service,
+            service_name: serviceName,
+            date: date,
+            time: selectedTime,
+            name: name,
+            phone: phone,
+            car: car,
+            timestamp: new Date().toISOString()
+        }
+    };
+    
+    console.log('📤 Данные для отправки:', bookingData);
+    
+    // Показываем загрузку
+    showLoading();
+    
+    // Проверяем, в Telegram ли мы
+    if (typeof Telegram !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
+        console.log('✅ Telegram WebApp доступен');
+        
+        try {
+            // 1. Показываем кнопку загрузки в Telegram
+            if (tg.MainButton) {
+                tg.MainButton.setText("📤 Отправка...");
+                tg.MainButton.showProgress();
             }
             
-            if (phone.length < 5) {
-                showError("Введите корректный номер телефона");
-                return;
-            }
+            console.log('📤 Отправляем через tg.sendData()...');
             
-            // Получаем название услуги
-            const serviceName = document.getElementById('service').options[document.getElementById('service').selectedIndex].text;
+            // 2. Отправляем данные - ВАЖНО: только СТРОКА!
+            tg.sendData(JSON.stringify(bookingData));
             
-            // Формируем данные для отправки
-            const bookingData = {
-                action: 'web_booking',
-                lang: currentLang,
-                data: {
-                    service: service,
-                    service_name: serviceName,
-                    date: date,
-                    time: selectedTime,
-                    name: name,
-                    phone: phone,
-                    car: car,
-                    timestamp: new Date().toISOString()
-                }
-            };
+            console.log('✅ tg.sendData() вызван успешно');
             
-            showLoading();
+            // 3. Слушаем ответ от Telegram
+            tg.onEvent('viewportChanged', function(e) {
+                console.log('🔄 viewportChanged:', e);
+            });
             
-            // Отправка в Telegram бота через WebApp
-            if (tg) {
-                try {
-                    // Отправляем данные боту
-                    tg.sendData(JSON.stringify(bookingData));
-                    
-                    // Ждем 2 секунды и показываем успех
-                    setTimeout(() => {
-                        showSuccess();
-                        
-                        // Через 3 секунды закрываем или возвращаемся
-                        setTimeout(() => {
-                            if (tg) {
-                                tg.close();
-                            } else {
-                                resetForm();
-                            }
-                        }, 3000);
-                    }, 2000);
-                    
-                } catch (error) {
-                    console.error('Ошибка отправки:', error);
-                    showError("Ошибка отправки. Попробуйте еще раз.");
-                    document.getElementById('bookingForm').style.display = 'block';
-                    document.getElementById('loading').style.display = 'none';
-                    document.getElementById('submitBtn').disabled = false;
-                }
-            } else {
-                // Если не в Telegram, эмулируем успешную отправку
+            tg.onEvent('themeChanged', function() {
+                console.log('🎨 themeChanged');
+            });
+            
+            // 4. Ждем и закрываем
+            setTimeout(() => {
+                console.log('🕒 Таймаут 1.5с, показываем успех');
+                showSuccess();
+                
+                // Ждем еще и закрываем
                 setTimeout(() => {
-                    showSuccess();
-                    
-                    // Показываем детали
-                    const details = 
-                        `${t.serviceLabel} ${serviceName}\n` +
-                        `${t.dateLabel} ${date}\n` +
-                        `${t.timeLabel} ${selectedTime}\n` +
-                        `${t.nameLabel} ${name}\n` +
-                        `${t.phoneLabel} ${phone}\n` +
-                        `${t.carLabel} ${car}`;
-                    
-                    console.log('Запись отправлена:', details);
-                    
-                    // Через 3 секунды сбрасываем форму
-                    setTimeout(() => {
-                        resetForm();
-                    }, 3000);
+                    console.log('🔒 Закрываем WebApp через 2с');
+                    if (tg && tg.close) {
+                        tg.close();
+                    }
                 }, 2000);
-            }
+            }, 1500);
+            
+        } catch (error) {
+            console.error('❌ Ошибка при отправке через Telegram:', error);
+            showError("Ошибка Telegram: " + error.message);
+            hideLoading();
+        }
+        
+    } else {
+        console.log('⚠️ Telegram WebApp НЕ доступен, работаем в браузере');
+        
+        // Эмуляция отправки для тестирования
+        setTimeout(() => {
+            console.log('✅ Эмуляция: запись "отправлена"');
+            showSuccess();
+            
+            // Сохраняем для отладки
+            const bookings = JSON.parse(localStorage.getItem('web_bookings') || '[]');
+            bookings.push({
+                ...bookingData,
+                received_at: new Date().toISOString()
+            });
+            localStorage.setItem('web_bookings', JSON.stringify(bookings));
+            
+            console.log('💾 Сохранено в localStorage, всего:', bookings.length);
+            
+            // Показываем детали
+            const details = 
+                `📋 Детали записи:\n` +
+                `👤 Имя: ${name}\n` +
+                `📞 Телефон: ${phone}\n` +
+                `🚗 Авто: ${car}\n` +
+                `🛠 Услуга: ${serviceName}\n` +
+                `📅 Дата: ${date}\n` +
+                `⏰ Время: ${selectedTime}\n\n` +
+                `ℹ️ Это тест без Telegram. В реальном Telegram данные уйдут боту.`;
+            
+            console.log(details);
+            
+            // Сбрасываем через 5 секунд
+            setTimeout(() => {
+                resetForm();
+            }, 5000);
+        }, 2000);
+    }
+}
+
+// Функция для ручной отправки через сообщение боту
+function sendViaMessage(bookingData) {
+    const message = 
+        `📋 НОВАЯ ЗАПИСЬ (WebApp)\n\n` +
+        `👤 Имя: ${bookingData.data.name}\n` +
+        `📞 Телефон: ${bookingData.data.phone}\n` +
+        `🚗 Авто: ${bookingData.data.car}\n` +
+        `🛠 Услуга: ${bookingData.data.service_name}\n` +
+        `📅 Дата: ${bookingData.data.date}\n` +
+        `⏰ Время: ${bookingData.data.time}\n` +
+        `🌐 Язык: ${bookingData.lang}`;
+    
+    // Создаем ссылку для отправки сообщения боту
+    const botUsername = 'sbremonts_bot'; // Замените на username вашего бота
+    const encodedMessage = encodeURIComponent(message);
+    const telegramUrl = `https://t.me/${botUsername}?start=webapp_${Date.now()}&text=${encodedMessage}`;
+    
+    // Открываем Telegram
+    window.open(telegramUrl, '_blank');
+    
+    return true;
+}
         }
 
         // Инициализация
