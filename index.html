@@ -507,5 +507,31 @@
             }
         });
     </script>
+    <!-- в index.html в конце script добавьте: -->
+<script>
+    // Telegram Web App
+    if (typeof Telegram !== 'undefined') {
+        const tg = Telegram.WebApp;
+        
+        // Развернуть на весь экран
+        tg.expand();
+        tg.ready();
+        
+        // Кнопка "Записаться онлайн" открывает booking.html в WebApp
+        document.querySelector('.btn-primary').addEventListener('click', function(e) {
+            e.preventDefault();
+            tg.openLink('booking.html'); // Открываем booking.html внутри WebApp
+        });
+        
+        // Языковой переключатель сохраняет в WebApp
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', function() {
+                const lang = this.dataset.lang;
+                tg.sendData(JSON.stringify({ action: 'set_language', lang: lang }));
+                localStorage.setItem('sbremonts_lang', lang);
+            });
+        });
+    }
+</script>
 </body>
 </html>
