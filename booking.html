@@ -606,9 +606,10 @@ async function submitBooking() {
         }, 2000);
     }
 }
-
-// Функция для ручной отправки через сообщение боту
 function sendViaMessage(bookingData) {
+    // ЗАМЕНИТЕ botUsername:
+    const botUsername = 'SBRemontss_bot';  // ДВА "s"!
+    
     const message = 
         `📋 НОВАЯ ЗАПИСЬ (WebApp)\n\n` +
         `👤 Имя: ${bookingData.data.name}\n` +
@@ -619,12 +620,9 @@ function sendViaMessage(bookingData) {
         `⏰ Время: ${bookingData.data.time}\n` +
         `🌐 Язык: ${bookingData.lang}`;
     
-    // Создаем ссылку для отправки сообщения боту
-    const botUsername = 'sbremontss_bot'; // Замените на username вашего бота
     const encodedMessage = encodeURIComponent(message);
-    const telegramUrl = `https://t.me/${botUsername}?start=webapp_${Date.now()}&text=${encodedMessage}`;
+    const telegramUrl = `https://t.me/${botUsername}?start=webapp_${Date.now()}`;
     
-    // Открываем Telegram
     window.open(telegramUrl, '_blank');
     
     return true;
