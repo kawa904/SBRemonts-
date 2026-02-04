@@ -12,6 +12,8 @@
             --light: #f8f9fa;
             --dark: #212529;
             --gray: #6c757d;
+            --danger: #dc3545;
+            --success: #28a745;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -69,9 +71,11 @@
         .form-input, .form-select { width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; font-size: 16px; transition: border 0.3s; }
         .form-input:focus, .form-select:focus { outline: none; border-color: var(--primary); }
         .time-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 10px; }
-        .time-btn { padding: 12px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; }
+        .time-btn { padding: 12px; background: #f8f9fa; border: 2px solid #e0e0e0; border-radius: 8px; text-align: center; cursor: pointer; transition: all 0.3s; font-weight: 600; }
         .time-btn:hover { border-color: var(--primary); }
         .time-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
+        .time-btn.booked { background: #ffebee; color: var(--danger); border-color: #ffcdd2; cursor: not-allowed; opacity: 0.6; }
+        .time-btn.booked:hover { border-color: #ffcdd2; }
         .submit-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .submit-btn:hover { opacity: 0.9; }
         .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -84,6 +88,33 @@
         @keyframes spin {
             0% { transform: rotate(0deg); }
             100% { transform: rotate(360deg); }
+        }
+        
+        /* Сообщения */
+        .status-message {
+            padding: 10px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-size: 14px;
+            display: none;
+        }
+        
+        .status-message.loading {
+            background: #e3f2fd;
+            color: #1565c0;
+            display: block;
+        }
+        
+        .status-message.error {
+            background: #ffebee;
+            color: #c62828;
+            display: block;
+        }
+        
+        .status-message.success {
+            background: #e8f5e9;
+            color: #2e7d32;
+            display: block;
         }
         
         @media (max-width: 480px) {
@@ -116,6 +147,9 @@
         </header>
 
         <div class="form-container">
+            <!-- Статус сообщения -->
+            <div id="statusMessage" class="status-message"></div>
+
             <div class="form-group">
                 <label class="form-label" id="service-label">Услуга:</label>
                 <select class="form-select" id="service">
@@ -130,13 +164,18 @@
 
             <div class="form-group">
                 <label class="form-label" id="date-label">Дата:</label>
-                <input type="date" class="form-input" id="date" min="">
+                <input type="date" class="form-input" id="date" min="" onchange="loadAvailableTimes()">
+                <div id="dateStatus" style="font-size: 12px; color: var(--gray); margin-top: 5px;"></div>
             </div>
 
             <div class="form-group">
                 <label class="form-label" id="time-label">Время:</label>
+                <div id="timeStatus" style="font-size: 12px; color: var(--gray); margin-bottom: 5px;"></div>
                 <div class="time-slots" id="timeSlots">
-                    <!-- Время добавится через JS -->
+                    <!-- Время загрузится через JS -->
+                </div>
+                <div id="noTimesMessage" style="color: var(--danger); font-size: 14px; margin-top: 10px; display: none;">
+                    <i class="fas fa-exclamation-circle"></i> Нет доступного времени на выбранную дату
                 </div>
             </div>
 
@@ -185,6 +224,13 @@
                 submitButton: "Отправить запись",
                 successMessage: "Запись отправлена!",
                 errorMessage: "Пожалуйста, заполните все поля!",
+                loadingTimes: "Загрузка доступного времени...",
+                timesLoaded: "Доступное время загружено",
+                noTimes: "Нет доступного времени на выбранную дату",
+                timeBooked: "Это время уже занято",
+                checkingAvailability: "Проверка доступности...",
+                timeAvailable: "Время свободно",
+                timeUnavailable: "Время занято, выберите другое",
                 timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
             },
             lv: {
@@ -208,6 +254,13 @@
                 submitButton: "Nosūtīt pierakstu",
                 successMessage: "Pieraksts nosūtīts!",
                 errorMessage: "Lūdzu, aizpildiet visus laukus!",
+                loadingTimes: "Ielādē pieejamo laiku...",
+                timesLoaded: "Pieejamais laiks ielādēts",
+                noTimes: "Nav pieejama laika izvēlētajā datumā",
+                timeBooked: "Šis laiks jau ir aizņemts",
+                checkingAvailability: "Pārbaudu pieejamību...",
+                timeAvailable: "Laiks ir brīvs",
+                timeUnavailable: "Laiks aizņemts, izvēlieties citu",
                 timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
             },
             en: {
@@ -231,12 +284,61 @@
                 submitButton: "Submit booking",
                 successMessage: "Booking submitted!",
                 errorMessage: "Please fill in all fields!",
+                loadingTimes: "Loading available times...",
+                timesLoaded: "Available times loaded",
+                noTimes: "No available time on selected date",
+                timeBooked: "This time is already booked",
+                checkingAvailability: "Checking availability...",
+                timeAvailable: "Time is available",
+                timeUnavailable: "Time is booked, choose another",
                 timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
             }
         };
 
+        // Конфигурация
+        const API_CONFIG = {
+            // ⚠️ ВАЖНО: Настройте эти URL для вашего API
+            // Вариант 1: Локальный API (запустите api.py)
+            // API_URL: "http://localhost:5000/api",
+            
+            // Вариант 2: Ваш хостинг
+            // API_URL: "https://ваш-хостинг.com/api",
+            
+            // Вариант 3: Прямой доступ к Google Sheets через Google Apps Script
+            // GOOGLE_SCRIPT_URL: "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec",
+            
+            // Текущая конфигурация (использует статическую проверку + Telegram)
+            mode: "telegram" // telegram, api, google
+        };
+
+        // Telegram конфигурация
+        const TELEGRAM_CONFIG = {
+            BOT_TOKEN: "7509122468:AAFbI7DqR_WDrtEO0qThBmox61x1ZJ6QZJw", // ⚠️ Замените на ваш токен
+            CHAT_ID: "1935376446", // ⚠️ Замените на ваш ID
+            SEND_TO_TELEGRAM: true
+        };
+
         let currentLang = 'ru';
         let selectedTime = null;
+        let bookedTimes = []; // Список занятых времен
+        let availableTimes = []; // Список всех доступных времен
+
+        // Показать сообщение статуса
+        function showStatus(message, type = 'info') {
+            const statusEl = document.getElementById('statusMessage');
+            statusEl.textContent = message;
+            statusEl.className = `status-message ${type}`;
+            
+            if (type === 'info') {
+                statusEl.style.display = 'none';
+            }
+            
+            setTimeout(() => {
+                if (type !== 'loading') {
+                    statusEl.style.display = 'none';
+                }
+            }, 5000);
+        }
 
         // Смена языка
         function changeLanguage(lang) {
@@ -272,15 +374,143 @@
             document.getElementById('submit-button').textContent = t.submitButton;
             
             localStorage.setItem('sbremonts_lang', lang);
+            
+            // Перезагружаем времена при смене языка
+            if (document.getElementById('date').value) {
+                loadAvailableTimes();
+            }
         }
 
-        // Генерация временных слотов
-        function generateTimeSlots() {
-            const timeSlots = bookingTranslations[currentLang].timeSlots;
+        // Загрузка доступного времени
+        async function loadAvailableTimes() {
+            const date = document.getElementById('date').value;
+            if (!date) return;
+            
+            const t = bookingTranslations[currentLang];
+            showStatus(t.loadingTimes, 'loading');
+            document.getElementById('timeStatus').textContent = t.loadingTimes;
+            
+            // Сбрасываем выбор времени
+            selectedTime = null;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+            
+            try {
+                // Получаем занятые времена с API
+                const bookedTimes = await getBookedTimes(date);
+                
+                // Генерируем все возможные времена (9:00-17:00)
+                const allTimes = bookingTranslations[currentLang].timeSlots;
+                
+                // Фильтруем занятые времена
+                availableTimes = allTimes.filter(time => !bookedTimes.includes(time));
+                
+                // Отображаем времена
+                renderTimeSlots(availableTimes, bookedTimes);
+                
+                // Обновляем статус
+                document.getElementById('timeStatus').textContent = 
+                    `${t.timesLoaded}. Свободно: ${availableTimes.length} из ${allTimes.length}`;
+                
+                // Показываем сообщение если нет свободного времени
+                const noTimesEl = document.getElementById('noTimesMessage');
+                if (availableTimes.length === 0) {
+                    noTimesEl.textContent = `⛔ ${t.noTimes}`;
+                    noTimesEl.style.display = 'block';
+                } else {
+                    noTimesEl.style.display = 'none';
+                }
+                
+                showStatus(t.timesLoaded, 'success');
+                
+            } catch (error) {
+                console.error('Ошибка загрузки времени:', error);
+                showStatus('Ошибка загрузки времени', 'error');
+                generateFallbackTimeSlots();
+            }
+        }
+
+        // Получение занятых времен с API
+        async function getBookedTimes(date) {
+            // ⚠️ ВАЖНО: Реализуйте получение данных с вашего API
+            // Пример для Google Sheets API:
+            
+            try {
+                // Вариант 1: Google Sheets API
+                if (API_CONFIG.mode === 'google' && API_CONFIG.GOOGLE_SCRIPT_URL) {
+                    const response = await fetch(`${API_CONFIG.GOOGLE_SCRIPT_URL}?action=getBookedTimes&date=${date}`);
+                    const data = await response.json();
+                    return data.bookedTimes || [];
+                }
+                
+                // Вариант 2: Ваш собственный API
+                else if (API_CONFIG.mode === 'api' && API_CONFIG.API_URL) {
+                    const response = await fetch(`${API_CONFIG.API_URL}/booked-times/${date}`);
+                    const data = await response.json();
+                    return data.bookedTimes || [];
+                }
+                
+                // Вариант 3: Статические данные для теста (ЗАМЕНИТЕ на реальные данные!)
+                else {
+                    // Для теста возвращаем случайные занятые времена
+                    // В реальном приложении это должно приходить с сервера
+                    const allTimes = bookingTranslations[currentLang].timeSlots;
+                    const randomBooked = allTimes.filter(() => Math.random() > 0.7);
+                    
+                    // Сохраняем для последующей проверки
+                    bookedTimes = randomBooked;
+                    
+                    return randomBooked;
+                }
+                
+            } catch (error) {
+                console.warn('Не удалось получить занятые времена:', error);
+                return [];
+            }
+        }
+
+        // Рендеринг временных слотов
+        function renderTimeSlots(availableTimes, bookedTimes) {
+            const container = document.getElementById('timeSlots');
+            const t = bookingTranslations[currentLang];
+            container.innerHTML = '';
+            
+            availableTimes.forEach(time => {
+                const isBooked = bookedTimes.includes(time);
+                const btn = document.createElement('div');
+                btn.className = `time-btn ${isBooked ? 'booked' : ''}`;
+                btn.textContent = time;
+                
+                if (!isBooked) {
+                    btn.onclick = function() {
+                        document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                        this.classList.add('selected');
+                        selectedTime = time;
+                        document.getElementById('noTimesMessage').style.display = 'none';
+                    };
+                } else {
+                    btn.title = t.timeBooked;
+                }
+                
+                container.appendChild(btn);
+            });
+            
+            // Если нет времен, показываем сообщение
+            if (availableTimes.length === 0) {
+                const message = document.createElement('div');
+                message.className = 'no-times-message';
+                message.innerHTML = `<i class="fas fa-calendar-times"></i> ${t.noTimes}`;
+                message.style.cssText = 'text-align: center; padding: 20px; color: var(--danger);';
+                container.appendChild(message);
+            }
+        }
+
+        // Запасной вариант генерации времен
+        function generateFallbackTimeSlots() {
+            const t = bookingTranslations[currentLang];
             const container = document.getElementById('timeSlots');
             container.innerHTML = '';
             
-            timeSlots.forEach(time => {
+            t.timeSlots.forEach(time => {
                 const btn = document.createElement('div');
                 btn.className = 'time-btn';
                 btn.textContent = time;
@@ -291,9 +521,36 @@
                 };
                 container.appendChild(btn);
             });
+            
+            document.getElementById('timeStatus').textContent = 'Используется стандартное расписание';
+            showStatus('Загружено стандартное расписание', 'info');
         }
 
-        // ОТПРАВКА ФОРМЫ - ОБНОВЛЕННАЯ ВЕРСИЯ
+        // Проверка доступности времени перед отправкой
+        async function checkTimeAvailability(date, time) {
+            const t = bookingTranslations[currentLang];
+            showStatus(t.checkingAvailability, 'loading');
+            
+            try {
+                // Получаем актуальные занятые времена
+                const bookedTimes = await getBookedTimes(date);
+                
+                if (bookedTimes.includes(time)) {
+                    showStatus(t.timeUnavailable, 'error');
+                    return false;
+                }
+                
+                showStatus(t.timeAvailable, 'success');
+                return true;
+                
+            } catch (error) {
+                console.error('Ошибка проверки времени:', error);
+                showStatus('Не удалось проверить доступность', 'error');
+                return true; // Разрешаем запись при ошибке
+            }
+        }
+
+        // ОТПРАВКА ФОРМЫ
         async function submitBooking() {
             console.log("🚀 Начинаю отправку записи...");
             
@@ -315,6 +572,14 @@
                 return;
             }
             
+            // Проверяем доступность времени
+            const isAvailable = await checkTimeAvailability(date, selectedTime);
+            if (!isAvailable) {
+                alert(`❌ ${t.timeBooked}\n\nПожалуйста, выберите другое время.`);
+                loadAvailableTimes(); // Перезагружаем список времен
+                return;
+            }
+            
             // Подготавливаем данные
             const bookingData = {
                 name: name,
@@ -324,7 +589,8 @@
                 date: date,
                 time: selectedTime,
                 language: currentLang,
-                timestamp: new Date().toISOString()
+                timestamp: new Date().toISOString(),
+                booking_id: new Date().getTime().toString()
             };
             
             // Показываем состояние загрузки
@@ -334,73 +600,33 @@
             submitBtn.disabled = true;
             
             try {
-                console.log("📤 Отправляю данные в Telegram...");
-                
-                // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ!
-                const BOT_TOKEN = "8592440601:AAG4QeAGycNr3DEgBc2b7-3WrwlAj_ZE80c"; // Ваш токен бота
-                const CHAT_ID = "1203338547"; // Ваш Telegram ID (админ)
-                
-                // Формируем сообщение для Telegram
-                const message = `📋 *НОВАЯ ЗАПИСЬ ИЗ МИНИАПП*\n\n` +
-                               `👤 *Имя:* ${bookingData.name}\n` +
-                               `📞 *Телефон:* ${bookingData.phone}\n` +
-                               `🚗 *Авто:* ${bookingData.car}\n` +
-                               `🛠 *Услуга:* ${bookingData.service}\n` +
-                               `📅 *Дата:* ${bookingData.date}\n` +
-                               `⏰ *Время:* ${bookingData.time}\n` +
-                               `🌐 *Язык:* ${bookingData.language}\n` +
-                               `🕐 *Отправлено:* ${new Date().toLocaleString()}`;
-                
-                console.log("📨 Сообщение для Telegram:", message);
-                
-                // Отправляем в Telegram через Bot API
-                const telegramResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json',
-                    },
-                    body: JSON.stringify({
-                        chat_id: CHAT_ID,
-                        text: message,
-                        parse_mode: 'Markdown'
-                    })
-                });
-                
-                const telegramResult = await telegramResponse.json();
-                console.log("📩 Ответ от Telegram:", telegramResult);
-                
-                if (telegramResult.ok) {
-                    console.log("✅ Запись отправлена в Telegram");
-                    
-                    // Также отправляем в Google Sheets (если настроено)
-                    await sendToGoogleSheets(bookingData);
-                    
-                    // Показываем успешное сообщение
-                    const bookingId = new Date().getTime();
-                    alert(`✅ ${t.successMessage}\n\nID записи: ${bookingId}\n\nМы свяжемся с вами в ближайшее время для подтверждения.`);
-                    
-                    // Очищаем форму
-                    document.getElementById('name').value = '';
-                    document.getElementById('phone').value = '';
-                    document.getElementById('car').value = '';
-                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                    selectedTime = null;
-                    
-                    // Возвращаем на главную через 3 секунды
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 3000);
-                    
-                } else {
-                    console.error("❌ Ошибка Telegram:", telegramResult);
-                    alert(`❌ Ошибка отправки: ${telegramResult.description || 'Неизвестная ошибка'}\n\nПожалуйста, позвоните нам: +371 249 07171`);
+                // Отправляем в Telegram
+                if (TELEGRAM_CONFIG.SEND_TO_TELEGRAM) {
+                    const success = await sendToTelegram(bookingData);
+                    if (!success) {
+                        throw new Error('Ошибка отправки в Telegram');
+                    }
                 }
+                
+                // Также отправляем в Google Sheets или другой бэкенд
+                await sendToBackend(bookingData);
+                
+                // Показываем успешное сообщение
+                alert(`✅ ${t.successMessage}\n\nID записи: ${bookingData.booking_id}\n\nМы свяжемся с вами для подтверждения.`);
+                
+                // Очищаем форму
+                resetForm();
+                
+                // Возвращаем на главную через 3 секунды
+                setTimeout(() => {
+                    window.location.href = 'index.html';
+                }, 3000);
                 
             } catch (error) {
                 console.error("❌ Критическая ошибка:", error);
-                alert('⚠️ Ошибка соединения с интернетом.\n\nПожалуйста, позвоните нам для записи:\n📞 +371 249 07171');
+                alert('⚠️ Ошибка отправки.\n\nПожалуйста, позвоните нам для записи:\n📞 +371 249 07171');
                 
-                // Альтернативный способ - сохраняем в localStorage
+                // Сохраняем в localStorage как резервный вариант
                 saveToLocalStorage(bookingData);
                 
             } finally {
@@ -410,25 +636,78 @@
             }
         }
 
-        // Отправка в Google Sheets через Google Apps Script
-        async function sendToGoogleSheets(bookingData) {
+        // Отправка в Telegram
+        async function sendToTelegram(bookingData) {
             try {
-                console.log("📊 Отправка в Google Sheets...");
+                const t = bookingTranslations[currentLang];
+                showStatus('Отправка в Telegram...', 'loading');
                 
-                // ⚠️ ВАЖНО: Создайте Google Apps Script и вставьте сюда URL
-                // const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+                // Формируем сообщение
+                const message = `📋 *НОВАЯ ЗАПИСЬ ИЗ МИНИАПП* #${bookingData.booking_id}\n\n` +
+                               `👤 *Имя:* ${bookingData.name}\n` +
+                               `📞 *Телефон:* ${bookingData.phone}\n` +
+                               `🚗 *Авто:* ${bookingData.car}\n` +
+                               `🛠 *Услуга:* ${bookingData.service}\n` +
+                               `📅 *Дата:* ${bookingData.date}\n` +
+                               `⏰ *Время:* ${bookingData.time}\n` +
+                               `🌐 *Язык:* ${bookingData.language}\n` +
+                               `🕐 *Отправлено:* ${new Date().toLocaleString()}`;
                 
-                // Если у вас нет Google Apps Script, можете раскомментировать и использовать
-                // fetch(APPS_SCRIPT_URL, {
-                //     method: 'POST',
-                //     mode: 'no-cors',
-                //     body: JSON.stringify(bookingData)
-                // });
+                // Отправляем в Telegram через Bot API
+                const telegramResponse = await fetch(`https://api.telegram.org/bot${TELEGRAM_CONFIG.BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        chat_id: TELEGRAM_CONFIG.CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
                 
-                console.log("✅ Данные подготовлены для Google Sheets");
+                const telegramResult = await telegramResponse.json();
+                
+                if (telegramResult.ok) {
+                    showStatus('Запись отправлена в Telegram', 'success');
+                    return true;
+                } else {
+                    console.error("❌ Ошибка Telegram:", telegramResult);
+                    showStatus('Ошибка отправки в Telegram', 'error');
+                    return false;
+                }
                 
             } catch (error) {
-                console.warn("⚠️ Ошибка Google Sheets (не критично):", error);
+                console.error("❌ Ошибка Telegram:", error);
+                showStatus('Ошибка соединения с Telegram', 'error');
+                return false;
+            }
+        }
+
+        // Отправка в бэкенд (Google Sheets/API)
+        async function sendToBackend(bookingData) {
+            try {
+                // Вариант 1: Google Apps Script
+                if (API_CONFIG.mode === 'google' && API_CONFIG.GOOGLE_SCRIPT_URL) {
+                    const response = await fetch(API_CONFIG.GOOGLE_SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        body: JSON.stringify(bookingData)
+                    });
+                    console.log("✅ Данные отправлены в Google Sheets");
+                }
+                
+                // Вариант 2: Ваш API
+                else if (API_CONFIG.mode === 'api' && API_CONFIG.API_URL) {
+                    const response = await fetch(`${API_CONFIG.API_URL}/booking`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(bookingData)
+                    });
+                    const result = await response.json();
+                    console.log("✅ Данные отправлены в API:", result);
+                }
+                
+            } catch (error) {
+                console.warn("⚠️ Ошибка бэкенда (не критично):", error);
             }
         }
 
@@ -436,17 +715,22 @@
         function saveToLocalStorage(bookingData) {
             try {
                 const bookings = JSON.parse(localStorage.getItem('sbremonts_bookings') || '[]');
-                bookingData.id = new Date().getTime();
-                bookingData.savedAt = new Date().toISOString();
                 bookings.push(bookingData);
                 localStorage.setItem('sbremonts_bookings', JSON.stringify(bookings));
-                
                 console.log("💾 Запись сохранена в localStorage:", bookingData);
-                alert('📝 Запись сохранена локально. Мы обработаем ее при восстановлении связи.');
-                
             } catch (error) {
                 console.error("❌ Ошибка localStorage:", error);
             }
+        }
+
+        // Сброс формы
+        function resetForm() {
+            document.getElementById('name').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('car').value = '';
+            document.getElementById('service').selectedIndex = 0;
+            selectedTime = null;
+            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
         }
 
         // Инициализация
@@ -463,13 +747,14 @@
             // Загружаем сохраненный язык
             const savedLang = localStorage.getItem('sbremonts_lang') || 'ru';
             changeLanguage(savedLang);
-            generateTimeSlots();
+            
+            // Загружаем доступное время для завтрашнего дня
+            loadAvailableTimes();
             
             // Обработчики кнопок языка
             document.querySelectorAll('.lang-btn').forEach(btn => {
                 btn.addEventListener('click', function() {
                     changeLanguage(this.dataset.lang);
-                    generateTimeSlots();
                 });
             });
             
@@ -478,11 +763,9 @@
                 console.log("✅ Открыто в Telegram Web App");
                 const tg = Telegram.WebApp;
                 
-                // Настраиваем Web App
                 tg.expand();
                 tg.enableClosingConfirmation();
                 
-                // Показываем кнопку Назад
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => {
                     window.location.href = 'index.html';
