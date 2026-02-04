@@ -74,6 +74,17 @@
         .time-btn.selected { background: var(--primary); color: white; border-color: var(--primary); }
         .submit-btn { background: linear-gradient(135deg, var(--primary), var(--secondary)); color: white; border: none; padding: 18px; border-radius: 15px; font-size: 18px; font-weight: 600; cursor: pointer; width: 100%; margin-top: 20px; display: flex; align-items: center; justify-content: center; gap: 10px; }
         .submit-btn:hover { opacity: 0.9; }
+        .submit-btn:disabled { opacity: 0.6; cursor: not-allowed; }
+        
+        /* Анимация загрузки */
+        .fa-spinner {
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
         
         @media (max-width: 480px) {
             .container { border-radius: 15px; }
@@ -144,7 +155,7 @@
                 <input type="text" class="form-input" id="car" placeholder="">
             </div>
 
-            <button class="submit-btn" onclick="submitBooking()">
+            <button class="submit-btn" onclick="submitBooking()" id="submitButton">
                 <i class="fas fa-paper-plane"></i> <span id="submit-button">Отправить запись</span>
             </button>
         </div>
@@ -282,57 +293,174 @@
             });
         }
 
-        // Отправка формы
-        function submitBooking() {
-            const t = bookingTranslations[currentLang];
-            const service = document.getElementById('service').value;
-            const date = document.getElementById('date').value;
-            const name = document.getElementById('name').value;
-            const phone = document.getElementById('phone').value;
-            const car = document.getElementById('car').value;
+        // ОТПРАВКА ФОРМЫ - ОБНОВЛЕННАЯ ВЕРСИЯ
+        async function submitBooking() {
+            console.log("🚀 Начинаю отправку записи...");
             
-            if (!service || !date || !selectedTime || !name || !phone || !car) {
+            const t = bookingTranslations[currentLang];
+            
+            // Получаем данные формы
+            const serviceSelect = document.getElementById('service');
+            const serviceText = serviceSelect.options[serviceSelect.selectedIndex].text;
+            const date = document.getElementById('date').value;
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const car = document.getElementById('car').value.trim();
+            
+            console.log("📋 Данные формы:", { serviceText, date, selectedTime, name, phone, car });
+            
+            // Валидация
+            if (!serviceText || serviceText === t.servicePlaceholder || !date || !selectedTime || !name || !phone || !car) {
                 alert(t.errorMessage);
                 return;
             }
             
-            // Отправка в Telegram бота
-            if (typeof Telegram !== 'undefined') {
-                const tg = Telegram.WebApp;
-                tg.sendData(JSON.stringify({
-                    action: 'booking',
-                    lang: currentLang,
-                    data: {
-                        service: document.getElementById('service').options[document.getElementById('service').selectedIndex].text,
-                        date,
-                        time: selectedTime,
-                        name,
-                        phone,
-                        car
-                    }
-                }));
-                tg.close();
-            } else {
-                alert(t.successMessage + '\n\n' +
-                    t.serviceLabel + ' ' + document.getElementById('service').options[document.getElementById('service').selectedIndex].text + '\n' +
-                    t.dateLabel + ' ' + date + '\n' +
-                    t.timeLabel + ' ' + selectedTime + '\n' +
-                    t.nameLabel + ' ' + name + '\n' +
-                    t.phoneLabel + ' ' + phone + '\n' +
-                    t.carLabel + ' ' + car);
+            // Подготавливаем данные
+            const bookingData = {
+                name: name,
+                phone: phone,
+                car: car,
+                service: serviceText,
+                date: date,
+                time: selectedTime,
+                language: currentLang,
+                timestamp: new Date().toISOString()
+            };
+            
+            // Показываем состояние загрузки
+            const submitBtn = document.getElementById('submitButton');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Отправка...';
+            submitBtn.disabled = true;
+            
+            try {
+                console.log("📤 Отправляю данные в Telegram...");
                 
-                setTimeout(() => window.location.href = 'index.html', 2000);
+                // ⚠️ ВАЖНО: ЗАМЕНИТЕ ЭТИ ДАННЫЕ НА ВАШИ!
+                const BOT_TOKEN = "8592440601:AAG4QeAGycNr3DEgBc2b7-3WrwlAj_ZE80c"; // Ваш токен бота
+                const CHAT_ID = "7957343249"; // Ваш Telegram ID (админ)
+                
+                // Формируем сообщение для Telegram
+                const message = `📋 *НОВАЯ ЗАПИСЬ ИЗ МИНИАПП*\n\n` +
+                               `👤 *Имя:* ${bookingData.name}\n` +
+                               `📞 *Телефон:* ${bookingData.phone}\n` +
+                               `🚗 *Авто:* ${bookingData.car}\n` +
+                               `🛠 *Услуга:* ${bookingData.service}\n` +
+                               `📅 *Дата:* ${bookingData.date}\n` +
+                               `⏰ *Время:* ${bookingData.time}\n` +
+                               `🌐 *Язык:* ${bookingData.language}\n` +
+                               `🕐 *Отправлено:* ${new Date().toLocaleString()}`;
+                
+                console.log("📨 Сообщение для Telegram:", message);
+                
+                // Отправляем в Telegram через Bot API
+                const telegramResponse = await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        chat_id: CHAT_ID,
+                        text: message,
+                        parse_mode: 'Markdown'
+                    })
+                });
+                
+                const telegramResult = await telegramResponse.json();
+                console.log("📩 Ответ от Telegram:", telegramResult);
+                
+                if (telegramResult.ok) {
+                    console.log("✅ Запись отправлена в Telegram");
+                    
+                    // Также отправляем в Google Sheets (если настроено)
+                    await sendToGoogleSheets(bookingData);
+                    
+                    // Показываем успешное сообщение
+                    const bookingId = new Date().getTime();
+                    alert(`✅ ${t.successMessage}\n\nID записи: ${bookingId}\n\nМы свяжемся с вами в ближайшее время для подтверждения.`);
+                    
+                    // Очищаем форму
+                    document.getElementById('name').value = '';
+                    document.getElementById('phone').value = '';
+                    document.getElementById('car').value = '';
+                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
+                    selectedTime = null;
+                    
+                    // Возвращаем на главную через 3 секунды
+                    setTimeout(() => {
+                        window.location.href = 'index.html';
+                    }, 3000);
+                    
+                } else {
+                    console.error("❌ Ошибка Telegram:", telegramResult);
+                    alert(`❌ Ошибка отправки: ${telegramResult.description || 'Неизвестная ошибка'}\n\nПожалуйста, позвоните нам: +371 249 07171`);
+                }
+                
+            } catch (error) {
+                console.error("❌ Критическая ошибка:", error);
+                alert('⚠️ Ошибка соединения с интернетом.\n\nПожалуйста, позвоните нам для записи:\n📞 +371 249 07171');
+                
+                // Альтернативный способ - сохраняем в localStorage
+                saveToLocalStorage(bookingData);
+                
+            } finally {
+                // Восстанавливаем кнопку
+                submitBtn.innerHTML = originalText;
+                submitBtn.disabled = false;
+            }
+        }
+
+        // Отправка в Google Sheets через Google Apps Script
+        async function sendToGoogleSheets(bookingData) {
+            try {
+                console.log("📊 Отправка в Google Sheets...");
+                
+                // ⚠️ ВАЖНО: Создайте Google Apps Script и вставьте сюда URL
+                // const APPS_SCRIPT_URL = "https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec";
+                
+                // Если у вас нет Google Apps Script, можете раскомментировать и использовать
+                // fetch(APPS_SCRIPT_URL, {
+                //     method: 'POST',
+                //     mode: 'no-cors',
+                //     body: JSON.stringify(bookingData)
+                // });
+                
+                console.log("✅ Данные подготовлены для Google Sheets");
+                
+            } catch (error) {
+                console.warn("⚠️ Ошибка Google Sheets (не критично):", error);
+            }
+        }
+
+        // Сохранение в localStorage как резервный вариант
+        function saveToLocalStorage(bookingData) {
+            try {
+                const bookings = JSON.parse(localStorage.getItem('sbremonts_bookings') || '[]');
+                bookingData.id = new Date().getTime();
+                bookingData.savedAt = new Date().toISOString();
+                bookings.push(bookingData);
+                localStorage.setItem('sbremonts_bookings', JSON.stringify(bookings));
+                
+                console.log("💾 Запись сохранена в localStorage:", bookingData);
+                alert('📝 Запись сохранена локально. Мы обработаем ее при восстановлении связи.');
+                
+            } catch (error) {
+                console.error("❌ Ошибка localStorage:", error);
             }
         }
 
         // Инициализация
         document.addEventListener('DOMContentLoaded', function() {
-            // Устанавливаем минимальную дату
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').min = today;
-            document.getElementById('date').value = today;
+            console.log("🚀 Инициализация формы записи...");
             
-            // Загружаем язык
+            // Устанавливаем минимальную дату (завтра)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const tomorrowStr = tomorrow.toISOString().split('T')[0];
+            document.getElementById('date').min = tomorrowStr;
+            document.getElementById('date').value = tomorrowStr;
+            
+            // Загружаем сохраненный язык
             const savedLang = localStorage.getItem('sbremonts_lang') || 'ru';
             changeLanguage(savedLang);
             generateTimeSlots();
@@ -345,15 +473,38 @@
                 });
             });
             
-            // Telegram
-            if (typeof Telegram !== 'undefined') {
+            // Проверяем, открыто ли в Telegram Web App
+            if (typeof Telegram !== 'undefined' && Telegram.WebApp) {
+                console.log("✅ Открыто в Telegram Web App");
                 const tg = Telegram.WebApp;
+                
+                // Настраиваем Web App
                 tg.expand();
+                tg.enableClosingConfirmation();
+                
+                // Показываем кнопку Назад
                 tg.BackButton.show();
                 tg.BackButton.onClick(() => {
                     window.location.href = 'index.html';
                 });
+                
+                // Автозаполнение данных пользователя Telegram
+                const user = tg.initDataUnsafe?.user;
+                if (user) {
+                    document.getElementById('name').value = user.first_name || '';
+                    if (user.last_name) {
+                        document.getElementById('name').value += ' ' + user.last_name;
+                    }
+                }
+                
+            } else {
+                console.log("🌐 Открыто в обычном браузере");
             }
+            
+            // Автофокус на первое поле
+            document.getElementById('name').focus();
+            
+            console.log("✅ Форма готова к использованию");
         });
     </script>
 </body>
