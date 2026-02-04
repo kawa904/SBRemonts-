@@ -422,97 +422,70 @@
             });
         }
 
-        // Отправка формы
-        function submitBooking() {
-            const t = bookingTranslations[currentLang];
-            const service = document.getElementById('service').value;
-            const date = document.getElementById('date').value;
-            const name = document.getElementById('name').value.trim();
-            const phone = document.getElementById('phone').value.trim();
-            const car = document.getElementById('car').value.trim();
-            const serviceText = document.getElementById('service').options[document.getElementById('service').selectedIndex].text;
-            
-            // Валидация
-            if (!service || !date || !selectedTime || !name || !phone || !car) {
-                alert(t.errorMessage);
-                return;
-            }
-            
-            if (name.length < 2) {
-                alert(currentLang === 'ru' ? 'Имя должно содержать минимум 2 символа' : 
-                      currentLang === 'lv' ? 'Vārdam jābūt vismaz 2 simbolus garam' : 
-                      'Name must be at least 2 characters');
-                return;
-            }
-            
-            if (phone.length < 5) {
-                alert(currentLang === 'ru' ? 'Введите корректный номер телефона' : 
-                      currentLang === 'lv' ? 'Ievadiet pareizu tālruņa numuru' : 
-                      'Please enter a valid phone number');
-                return;
-            }
-            
-            const submitBtn = document.getElementById('submitButton');
-            submitBtn.disabled = true;
-            
-            // Отправка в Telegram бота
-            if (typeof Telegram !== 'undefined') {
-                const tg = Telegram.WebApp;
-                
-                // Показываем индикатор загрузки
-                tg.MainButton.showProgress();
-                
-                // Отправляем данные
-                tg.sendData(JSON.stringify({
-                    action: 'booking',
-                    lang: currentLang,
-                    data: {
-                        service: serviceText,
-                        date: date,
-                        time: selectedTime,
-                        name: name,
-                        phone: phone,
-                        car: car
-                    }
-                }));
-                
-                // Через 2 секунды возвращаем кнопку в нормальное состояние
-                setTimeout(() => {
-                    submitBtn.disabled = false;
-                    if (tg.MainButton.isVisible) {
-                        tg.MainButton.hideProgress();
-                    }
-                }, 2000);
-                
-            } else {
-                // Для обычного браузера
-                const originalText = submitBtn.innerHTML;
-                
-                submitBtn.innerHTML = '<i class="fas fa-check"></i> ' + t.successMessage;
-                submitBtn.style.background = 'linear-gradient(135deg, #4CAF50, #2E7D32)';
-                
-                alert(t.successMessage + '\n\n' +
-                    t.serviceLabel + ' ' + serviceText + '\n' +
-                    t.dateLabel + ' ' + date + '\n' +
-                    t.timeLabel + ' ' + selectedTime + '\n' +
-                    t.nameLabel + ' ' + name + '\n' +
-                    t.phoneLabel + ' ' + phone + '\n' +
-                    t.carLabel + ' ' + car);
-                
-                // Сбрасываем форму через 3 секунды
-                setTimeout(() => {
-                    document.getElementById('service').selectedIndex = 0;
-                    document.getElementById('name').value = '';
-                    document.getElementById('phone').value = '';
-                    document.getElementById('car').value = '';
-                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                    selectedTime = null;
-                    
-                    submitBtn.innerHTML = originalText;
-                    submitBtn.style.background = 'linear-gradient(135deg, #4361ee, #3a0ca3)';
-                    submitBtn.disabled = false;
-                }, 3000);
-            }
+     // Отправка формы
+function submitBooking() {
+    const t = bookingTranslations[currentLang];
+    const service = document.getElementById('service').value;
+    const date = document.getElementById('date').value;
+    const name = document.getElementById('name').value;
+    const phone = document.getElementById('phone').value;
+    const car = document.getElementById('car').value;
+    
+    if (!service || !date || !selectedTime || !name || !phone || !car) {
+        alert(t.errorMessage);
+        return;
+    }
+    
+    // Получаем название услуги
+    const serviceName = document.getElementById('service').options[document.getElementById('service').selectedIndex].text;
+    
+    // Формируем данные для отправки
+    const bookingData = {
+        action: 'booking',
+        lang: currentLang,
+        data: {
+            service: serviceName,
+            date: date,
+            time: selectedTime,
+            name: name,
+            phone: phone,
+            car: car,
+            service_code: service // внутренний код услуги
+        }
+    };
+    
+    // Отправка в Telegram бота через WebApp
+    if (typeof Telegram !== 'undefined') {
+        const tg = Telegram.WebApp;
+        
+        // Показываем индикатор загрузки
+        tg.MainButton.showProgress();
+        
+        // Отправляем данные боту
+        tg.sendData(JSON.stringify(bookingData));
+        
+        // Ждем немного и закрываем
+        setTimeout(() => {
+            tg.MainButton.hideProgress();
+            tg.close();
+        }, 2000);
+    } else {
+        // Если не в Telegram, показываем сообщение
+        const successMessage = 
+            `${t.successMessage}\n\n` +
+            `${t.serviceLabel} ${serviceName}\n` +
+            `${t.dateLabel} ${date}\n` +
+            `${t.timeLabel} ${selectedTime}\n` +
+            `${t.nameLabel} ${name}\n` +
+            `${t.phoneLabel} ${phone}\n` +
+            `${t.carLabel} ${car}\n\n` +
+            `ℹ️ Запись отправлена в сервис. С вами свяжутся для подтверждения.`;
+        
+        alert(successMessage);
+        
+        setTimeout(() => window.location.href = 'index.html', 3000);
+    }
+ }
         }
 
         // Инициализация
