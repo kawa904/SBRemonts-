@@ -10,434 +10,306 @@
         :root {
             --primary: #4361ee;
             --secondary: #3a0ca3;
-            --light: #f8f9fa;
-            --dark: #212529;
-            --gray: #6c757d;
         }
         
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { 
             font-family: -apple-system, BlinkMacSystemFont, sans-serif; 
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); 
-            padding: 20px; 
-            min-height: 100vh; 
-        }
-        .container { 
-            max-width: 500px; 
-            margin: 0 auto; 
-            background: white; 
-            border-radius: 25px; 
-            overflow: hidden; 
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3); 
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 20px;
+            min-height: 100vh;
         }
         
-        /* Языковой переключатель */
-        .language-switcher {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 100;
-            display: flex;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.9);
-            padding: 8px 12px;
+        .container {
+            max-width: 100%;
+            background: white;
             border-radius: 20px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
-            backdrop-filter: blur(10px);
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
         
-        .lang-btn {
-            background: none;
-            border: none;
+        .header {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+            position: relative;
+        }
+        
+        .back-btn {
+            position: absolute;
+            left: 15px;
+            top: 15px;
+            color: white;
             font-size: 20px;
-            cursor: pointer;
-            padding: 5px;
+            background: rgba(255,255,255,0.2);
+            width: 40px;
+            height: 40px;
             border-radius: 50%;
-            width: 36px;
-            height: 36px;
             display: flex;
             align-items: center;
             justify-content: center;
-            transition: all 0.3s;
+            cursor: pointer;
         }
         
-        .lang-btn:hover {
-            background: rgba(67, 97, 238, 0.1);
-            transform: scale(1.1);
+        .form-container {
+            padding: 20px;
         }
         
-        .lang-btn.active {
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #333;
+        }
+        
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 16px;
+        }
+        
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 10px;
+        }
+        
+        .time-btn {
+            padding: 10px;
+            background: #f8f9fa;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            text-align: center;
+            cursor: pointer;
+        }
+        
+        .time-btn.selected {
             background: var(--primary);
             color: white;
-            box-shadow: 0 4px 10px rgba(67, 97, 238, 0.3);
+            border-color: var(--primary);
         }
         
-        .header { 
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            color: white; 
-            padding: 40px 25px 30px; 
-            text-align: center; 
-            position: relative; 
-        }
-        .back-btn { 
-            position: absolute; 
-            left: 20px; 
-            top: 20px; 
-            color: white; 
-            font-size: 20px; 
-            cursor: pointer; 
-            background: rgba(255,255,255,0.2); 
-            width: 40px; 
-            height: 40px; 
-            border-radius: 50%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-        }
-        .logo { 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 15px; 
-            margin-bottom: 10px; 
-        }
-        .logo h1 { font-size: 24px; }
-        .form-container { padding: 25px; }
-        .form-group { margin-bottom: 20px; }
-        .form-label { 
-            display: block; 
-            margin-bottom: 8px; 
-            font-weight: 600; 
-            color: #333; 
-        }
-        .form-input, .form-select { 
-            width: 100%; 
-            padding: 15px; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 10px; 
-            font-size: 16px; 
-            transition: border 0.3s; 
-        }
-        .form-input:focus, .form-select:focus { 
-            outline: none; 
-            border-color: var(--primary); 
-        }
-        .time-slots { 
-            display: grid; 
-            grid-template-columns: repeat(3, 1fr); 
-            gap: 10px; 
-            margin-top: 10px; 
-        }
-        .time-btn { 
-            padding: 12px; 
-            background: #f8f9fa; 
-            border: 2px solid #e0e0e0; 
-            border-radius: 8px; 
-            text-align: center; 
-            cursor: pointer; 
-            transition: all 0.3s; 
-        }
-        .time-btn:hover { border-color: var(--primary); }
-        .time-btn.selected { 
-            background: var(--primary); 
-            color: white; 
-            border-color: var(--primary); 
-        }
-        .submit-btn { 
-            background: linear-gradient(135deg, var(--primary), var(--secondary)); 
-            color: white; 
-            border: none; 
-            padding: 18px; 
-            border-radius: 15px; 
-            font-size: 18px; 
-            font-weight: 600; 
-            cursor: pointer; 
-            width: 100%; 
-            margin-top: 20px; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            gap: 10px; 
-        }
-        .submit-btn:hover { opacity: 0.9; }
-        .submit-btn:disabled { 
-            opacity: 0.6; 
-            cursor: not-allowed; 
+        .submit-btn {
+            background: linear-gradient(135deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         
-        .loading {
-            display: none;
+        .submit-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .success-message, .loading {
             text-align: center;
-            padding: 20px;
-            color: var(--primary);
+            padding: 40px 20px;
+            display: none;
         }
         
-        .success-message {
-            display: none;
-            text-align: center;
-            padding: 30px;
+        .success-message i {
+            font-size: 60px;
             color: #28a745;
+            margin-bottom: 20px;
+        }
+        
+        .loading i {
+            font-size: 40px;
+            color: var(--primary);
+            margin-bottom: 20px;
         }
         
         .error-message {
-            display: none;
-            text-align: center;
-            padding: 15px;
             background: #ffebee;
             color: #c62828;
-            border-radius: 10px;
-            margin-bottom: 20px;
+            padding: 10px;
+            border-radius: 8px;
+            margin-bottom: 15px;
+            display: none;
             border: 1px solid #ffcdd2;
         }
         
-        @media (max-width: 480px) {
-            .container { border-radius: 15px; }
-            .header { padding: 35px 20px 25px; }
-            .language-switcher { top: 15px; right: 15px; padding: 6px 10px; }
-            .lang-btn { width: 32px; height: 32px; font-size: 18px; }
-            .time-slots { grid-template-columns: repeat(2, 1fr); }
+        .info-box {
+            background: #e3f2fd;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+        
+        .info-box i {
+            color: var(--primary);
+            margin-right: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <!-- Языковой переключатель -->
-        <div class="language-switcher">
-            <button class="lang-btn active" data-lang="ru" title="Русский">🇷🇺</button>
-            <button class="lang-btn" data-lang="lv" title="Latviešu">🇱🇻</button>
-            <button class="lang-btn" data-lang="en" title="English">🇺🇸</button>
-        </div>
-
-        <header class="header">
+        <div class="header">
             <div class="back-btn" id="backBtn">
                 <i class="fas fa-arrow-left"></i>
             </div>
             <div class="logo">
                 <i class="fas fa-calendar-check"></i>
-                <h1 id="page-title">Запись на услугу</h1>
+                <h1>Запись на услугу</h1>
             </div>
-            <p id="page-subtitle">Заполните форму ниже</p>
-        </header>
+            <p>Заполните форму ниже</p>
+        </div>
 
         <div class="form-container">
+            <div class="info-box">
+                <i class="fas fa-info-circle"></i>
+                <b>Запись через сайт</b><br>
+                Все данные автоматически отправятся в бот
+            </div>
+            
             <div class="error-message" id="errorMessage"></div>
             
             <div class="loading" id="loading">
-                <i class="fas fa-spinner fa-spin fa-2x"></i>
-                <p id="loading-text">Отправка записи...</p>
+                <i class="fas fa-spinner fa-spin"></i>
+                <p>Отправка записи...</p>
             </div>
             
             <div class="success-message" id="successMessage">
-                <i class="fas fa-check-circle fa-3x"></i>
-                <h3 id="success-title">Запись отправлена!</h3>
-                <p id="success-text">Мы свяжемся с вами для подтверждения.</p>
+                <i class="fas fa-check-circle"></i>
+                <h2>Запись отправлена!</h2>
+                <p>Бот подтвердит запись в Telegram</p>
             </div>
             
             <div id="bookingForm">
                 <div class="form-group">
-                    <label class="form-label" id="service-label">Услуга:</label>
+                    <label class="form-label">Услуга:</label>
                     <select class="form-select" id="service">
-                        <option value="" id="service-placeholder">Выберите услугу</option>
-                        <option value="diagnostics" id="service-option1">Диагностика</option>
-                        <option value="oil_change" id="service-option2">Замена масла и фильтра</option>
-                        <option value="brakes" id="service-option3">Ремонт тормозов</option>
-                        <option value="suspension" id="service-option4">Ремонт подвески</option>
-                        <option value="electrical" id="service-option5">Электрика</option>
-                        <option value="engine" id="service-option6">Ремонт двигателя</option>
-                        <option value="other" id="service-option7">Другое</option>
+                        <option value="">Выберите услугу</option>
+                        <option value="diagnostics">Диагностика - 40€</option>
+                        <option value="oil">Замена масла - 30€</option>
+                        <option value="brakes">Тормозная система - 40€</option>
+                        <option value="suspension">Подвеска - 50€</option>
+                        <option value="other">Другое</option>
                     </select>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" id="date-label">Дата:</label>
+                    <label class="form-label">Дата:</label>
                     <input type="date" class="form-input" id="date" min="">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" id="time-label">Время:</label>
+                    <label class="form-label">Время:</label>
                     <div class="time-slots" id="timeSlots">
-                        <!-- Время добавится через JS -->
+                        <div class="time-btn" data-time="09:00">09:00</div>
+                        <div class="time-btn" data-time="10:00">10:00</div>
+                        <div class="time-btn" data-time="11:00">11:00</div>
+                        <div class="time-btn" data-time="12:00">12:00</div>
+                        <div class="time-btn" data-time="13:00">13:00</div>
+                        <div class="time-btn" data-time="14:00">14:00</div>
+                        <div class="time-btn" data-time="15:00">15:00</div>
+                        <div class="time-btn" data-time="16:00">16:00</div>
+                        <div class="time-btn" data-time="17:00">17:00</div>
                     </div>
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" id="name-label">Ваше имя:</label>
-                    <input type="text" class="form-input" id="name" placeholder="">
+                    <label class="form-label">Ваше имя:</label>
+                    <input type="text" class="form-input" id="name" placeholder="Иван Иванов">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" id="phone-label">Телефон:</label>
-                    <input type="tel" class="form-input" id="phone" placeholder="">
+                    <label class="form-label">Телефон:</label>
+                    <input type="tel" class="form-input" id="phone" placeholder="+371 12345678">
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label" id="car-label">Автомобиль:</label>
-                    <input type="text" class="form-input" id="car" placeholder="">
+                    <label class="form-label">Автомобиль:</label>
+                    <input type="text" class="form-input" id="car" placeholder="Toyota Camry 2018">
                 </div>
 
                 <button class="submit-btn" id="submitBtn">
-                    <i class="fas fa-paper-plane"></i> <span id="submit-button">Отправить запись</span>
+                    <i class="fas fa-check-circle"></i> Подтвердить запись
                 </button>
             </div>
         </div>
     </div>
 
     <script>
-        // Тексты для формы
-        const bookingTranslations = {
-            ru: {
-                pageTitle: "Запись на услугу",
-                pageSubtitle: "Заполните форму ниже",
-                serviceLabel: "Услуга:",
-                servicePlaceholder: "Выберите услугу",
-                serviceOption1: "Диагностика",
-                serviceOption2: "Замена масла и фильтра", 
-                serviceOption3: "Ремонт тормозов",
-                serviceOption4: "Ремонт подвески",
-                serviceOption5: "Электрика",
-                serviceOption6: "Ремонт двигателя",
-                serviceOption7: "Другое",
-                dateLabel: "Дата:",
-                timeLabel: "Время:",
-                nameLabel: "Ваше имя:",
-                namePlaceholder: "Иван Иванов",
-                phoneLabel: "Телефон:",
-                phonePlaceholder: "+371 12345678",
-                carLabel: "Автомобиль:",
-                carPlaceholder: "Toyota Camry 2018",
-                submitButton: "Отправить запись",
-                loadingText: "Отправка записи...",
-                successTitle: "Запись отправлена!",
-                successText: "Мы свяжемся с вами для подтверждения.",
-                errorMessage: "Пожалуйста, заполните все поля!",
-                timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-            },
-            lv: {
-                pageTitle: "Pierakstīšanās uz pakalpojumu",
-                pageSubtitle: "Aizpildiet zemāk esošo veidlapu",
-                serviceLabel: "Pakalpojums:",
-                servicePlaceholder: "Izvēlieties pakalpojumu",
-                serviceOption1: "Diagnostika",
-                serviceOption2: "Eļļas un filtra maiņa",
-                serviceOption3: "Bremžu remonts", 
-                serviceOption4: "Piekares remonts",
-                serviceOption5: "Elektrība",
-                serviceOption6: "Dzinēja remonts",
-                serviceOption7: "Cits",
-                dateLabel: "Datums:",
-                timeLabel: "Laiks:",
-                nameLabel: "Jūsu vārds:",
-                namePlaceholder: "Jānis Bērziņš",
-                phoneLabel: "Telefons:",
-                phonePlaceholder: "+371 12345678",
-                carLabel: "Automobilis:",
-                carPlaceholder: "Toyota Camry 2018",
-                submitButton: "Nosūtīt pierakstu",
-                loadingText: "Nosūta pierakstu...",
-                successTitle: "Pieraksts nosūtīts!",
-                successText: "Mēs ar jums sazināsimies, lai apstiprinātu.",
-                errorMessage: "Lūdzu, aizpildiet visus laukus!",
-                timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-            },
-            en: {
-                pageTitle: "Service Booking",
-                pageSubtitle: "Fill out the form below",
-                serviceLabel: "Service:",
-                servicePlaceholder: "Select a service",
-                serviceOption1: "Diagnostics",
-                serviceOption2: "Oil and filter replacement",
-                serviceOption3: "Brake repair",
-                serviceOption4: "Suspension repair", 
-                serviceOption5: "Electrical",
-                serviceOption6: "Engine repair",
-                serviceOption7: "Other",
-                dateLabel: "Date:",
-                timeLabel: "Time:",
-                nameLabel: "Your name:",
-                namePlaceholder: "John Smith",
-                phoneLabel: "Phone:",
-                phonePlaceholder: "+371 12345678",
-                carLabel: "Car:",
-                carPlaceholder: "Toyota Camry 2018",
-                submitButton: "Submit booking",
-                loadingText: "Sending booking...",
-                successTitle: "Booking submitted!",
-                successText: "We will contact you for confirmation.",
-                errorMessage: "Please fill in all fields!",
-                timeSlots: ['09:00', '10:00', '11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00']
-            }
-        };
-
-        let currentLang = 'ru';
-        let selectedTime = null;
         let tg = null;
-
-        // Смена языка
-        function changeLanguage(lang) {
-            currentLang = lang;
-            const t = bookingTranslations[lang];
+        let selectedTime = null;
+        
+        // Инициализация
+        document.addEventListener('DOMContentLoaded', function() {
+            // Проверяем Telegram WebApp
+            if (typeof Telegram !== 'undefined') {
+                tg = Telegram.WebApp;
+                tg.expand(); // Разворачиваем на весь экран
+                tg.ready();
+                console.log('✅ WebApp запущен в Telegram');
+            } else {
+                console.log('⚠️ Запущено вне Telegram');
+                document.getElementById('backBtn').onclick = function() {
+                    window.history.back();
+                };
+            }
             
-            // Обновляем активную кнопку
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.dataset.lang === lang) {
-                    btn.classList.add('active');
+            // Устанавливаем минимальную дату (завтра)
+            const tomorrow = new Date();
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const minDate = tomorrow.toISOString().split('T')[0];
+            document.getElementById('date').min = minDate;
+            
+            // Устанавливаем дату через 2 дня (рабочий день)
+            let nextDate = new Date(tomorrow);
+            while (nextDate.getDay() === 6 || nextDate.getDay() === 0) { // Сб или Вс
+                nextDate.setDate(nextDate.getDate() + 1);
+            }
+            document.getElementById('date').value = nextDate.toISOString().split('T')[0];
+            
+            // Назначаем обработчики
+            setupEventListeners();
+        });
+        
+        function setupEventListeners() {
+            // Выбор времени
+            document.querySelectorAll('.time-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    document.querySelectorAll('.time-btn').forEach(b => {
+                        b.classList.remove('selected');
+                    });
+                    this.classList.add('selected');
+                    selectedTime = this.dataset.time;
+                });
+            });
+            
+            // Кнопка назад
+            document.getElementById('backBtn').addEventListener('click', function() {
+                if (tg && tg.close) {
+                    tg.close();
+                } else {
+                    window.history.back();
                 }
             });
             
-            // Обновляем тексты
-            document.getElementById('page-title').textContent = t.pageTitle;
-            document.getElementById('page-subtitle').textContent = t.pageSubtitle;
-            document.getElementById('service-label').textContent = t.serviceLabel;
-            document.getElementById('service-placeholder').textContent = t.servicePlaceholder;
-            document.getElementById('service-option1').textContent = t.serviceOption1;
-            document.getElementById('service-option2').textContent = t.serviceOption2;
-            document.getElementById('service-option3').textContent = t.serviceOption3;
-            document.getElementById('service-option4').textContent = t.serviceOption4;
-            document.getElementById('service-option5').textContent = t.serviceOption5;
-            document.getElementById('service-option6').textContent = t.serviceOption6;
-            document.getElementById('service-option7').textContent = t.serviceOption7;
-            document.getElementById('date-label').textContent = t.dateLabel;
-            document.getElementById('time-label').textContent = t.timeLabel;
-            document.getElementById('name-label').textContent = t.nameLabel;
-            document.getElementById('name').placeholder = t.namePlaceholder;
-            document.getElementById('phone-label').textContent = t.phoneLabel;
-            document.getElementById('phone').placeholder = t.phonePlaceholder;
-            document.getElementById('car-label').textContent = t.carLabel;
-            document.getElementById('car').placeholder = t.carPlaceholder;
-            document.getElementById('submit-button').textContent = t.submitButton;
-            document.getElementById('loading-text').textContent = t.loadingText;
-            document.getElementById('success-title').textContent = t.successTitle;
-            document.getElementById('success-text').textContent = t.successText;
-            
-            localStorage.setItem('sbremonts_lang', lang);
-            
-            // Если в Telegram, отправляем данные о смене языка
-            if (tg) {
-                tg.sendData(JSON.stringify({ action: 'set_language', lang: lang }));
-            }
+            // Кнопка отправки
+            document.getElementById('submitBtn').addEventListener('click', submitBooking);
         }
-
-        // Генерация временных слотов
-        function generateTimeSlots() {
-            const timeSlots = bookingTranslations[currentLang].timeSlots;
-            const container = document.getElementById('timeSlots');
-            container.innerHTML = '';
-            
-            timeSlots.forEach(time => {
-                const btn = document.createElement('div');
-                btn.className = 'time-btn';
-                btn.textContent = time;
-                btn.onclick = function() {
-                    document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-                    this.classList.add('selected');
-                    selectedTime = time;
-                };
-                container.appendChild(btn);
-            });
-        }
-
-        // Показать ошибку
+        
         function showError(message) {
             const errorDiv = document.getElementById('errorMessage');
             errorDiv.textContent = message;
@@ -446,238 +318,130 @@
                 errorDiv.style.display = 'none';
             }, 5000);
         }
-
-        // Показать загрузку
+        
         function showLoading() {
             document.getElementById('bookingForm').style.display = 'none';
             document.getElementById('loading').style.display = 'block';
             document.getElementById('submitBtn').disabled = true;
         }
-
-        // Показать успех
+        
         function showSuccess() {
             document.getElementById('loading').style.display = 'none';
             document.getElementById('successMessage').style.display = 'block';
         }
-
-        // Сброс формы
+        
         function resetForm() {
             document.getElementById('bookingForm').style.display = 'block';
             document.getElementById('successMessage').style.display = 'none';
             document.getElementById('submitBtn').disabled = false;
-            
-            // Очищаем форму
-            document.getElementById('service').value = '';
-            document.getElementById('date').value = '';
-            document.getElementById('name').value = '';
-            document.getElementById('phone').value = '';
-            document.getElementById('car').value = '';
-            document.querySelectorAll('.time-btn').forEach(b => b.classList.remove('selected'));
-            selectedTime = null;
         }
-
-       
-   // НОВАЯ ФУНКЦИЯ отправки с подтверждением
-async function submitBooking() {
-    console.log('=== НАЧАЛО ОТПРАВКИ ===');
-    
-    const t = bookingTranslations[currentLang];
-    const service = document.getElementById('service').value;
-    const date = document.getElementById('date').value;
-    const name = document.getElementById('name').value.trim();
-    const phone = document.getElementById('phone').value.trim();
-    const car = document.getElementById('car').value.trim();
-    
-    console.log('📋 Данные формы:', { service, date, name, phone, car, selectedTime });
-    
-    // Валидация
-    if (!service || !date || !selectedTime || !name || !phone || !car) {
-        console.log('❌ Ошибка валидации: не все поля заполнены');
-        showError(t.errorMessage);
-        return;
-    }
-    
-    // Получаем название услуги
-    const serviceName = document.getElementById('service').options[document.getElementById('service').selectedIndex].text;
-    
-    // Формируем данные для отправки
-    const bookingData = {
-        action: 'web_booking',
-        lang: currentLang,
-        data: {
-            service: service,
-            service_name: serviceName,
-            date: date,
-            time: selectedTime,
-            name: name,
-            phone: phone,
-            car: car,
-            timestamp: new Date().toISOString()
-        }
-    };
-    
-    console.log('📤 Данные для отправки:', bookingData);
-    
-    // Показываем загрузку
-    showLoading();
-    
-    // Проверяем, в Telegram ли мы
-    if (typeof Telegram !== 'undefined' && window.Telegram && window.Telegram.WebApp) {
-        console.log('✅ Telegram WebApp доступен');
         
-        try {
-            // 1. Показываем кнопку загрузки в Telegram
-            if (tg.MainButton) {
-                tg.MainButton.setText("📤 Отправка...");
-                tg.MainButton.showProgress();
+        async function submitBooking() {
+            // Собираем данные
+            const serviceSelect = document.getElementById('service');
+            const service = serviceSelect.value;
+            const serviceName = serviceSelect.options[serviceSelect.selectedIndex].text;
+            const date = document.getElementById('date').value;
+            const name = document.getElementById('name').value.trim();
+            const phone = document.getElementById('phone').value.trim();
+            const car = document.getElementById('car').value.trim();
+            
+            // Валидация
+            if (!service || !date || !selectedTime || !name || !phone || !car) {
+                showError('Пожалуйста, заполните все поля');
+                return;
             }
             
-            console.log('📤 Отправляем через tg.sendData()...');
+            if (phone.length < 5) {
+                showError('Введите корректный номер телефона');
+                return;
+            }
             
-            // 2. Отправляем данные - ВАЖНО: только СТРОКА!
-            tg.sendData(JSON.stringify(bookingData));
-            
-            console.log('✅ tg.sendData() вызван успешно');
-            
-            // 3. Слушаем ответ от Telegram
-            tg.onEvent('viewportChanged', function(e) {
-                console.log('🔄 viewportChanged:', e);
+            // Форматируем дату
+            const dateObj = new Date(date);
+            const formattedDate = dateObj.toLocaleDateString('ru-RU', {
+                day: '2-digit',
+                month: '2-digit',
+                year: 'numeric'
             });
             
-            tg.onEvent('themeChanged', function() {
-                console.log('🎨 themeChanged');
-            });
+            // Формируем данные для отправки
+            const bookingData = {
+                action: 'confirm_booking',
+                data: {
+                    service: service,
+                    service_name: serviceName,
+                    date: date,
+                    date_formatted: formattedDate,
+                    time: selectedTime,
+                    name: name,
+                    phone: phone,
+                    car: car,
+                    timestamp: new Date().toISOString()
+                }
+            };
             
-            // 4. Ждем и закрываем
-            setTimeout(() => {
-                console.log('🕒 Таймаут 1.5с, показываем успех');
-                showSuccess();
-                
-                // Ждем еще и закрываем
-                setTimeout(() => {
-                    console.log('🔒 Закрываем WebApp через 2с');
-                    if (tg && tg.close) {
-                        tg.close();
-                    }
-                }, 2000);
-            }, 1500);
+            console.log('📤 Отправляемые данные:', bookingData);
             
-        } catch (error) {
-            console.error('❌ Ошибка при отправке через Telegram:', error);
-            showError("Ошибка Telegram: " + error.message);
-            hideLoading();
-        }
-        
-    } else {
-        console.log('⚠️ Telegram WebApp НЕ доступен, работаем в браузере');
-        
-        // Эмуляция отправки для тестирования
-        setTimeout(() => {
-            console.log('✅ Эмуляция: запись "отправлена"');
-            showSuccess();
+            // Показываем загрузку
+            showLoading();
             
-            // Сохраняем для отладки
-            const bookings = JSON.parse(localStorage.getItem('web_bookings') || '[]');
-            bookings.push({
-                ...bookingData,
-                received_at: new Date().toISOString()
-            });
-            localStorage.setItem('web_bookings', JSON.stringify(bookings));
-            
-            console.log('💾 Сохранено в localStorage, всего:', bookings.length);
-            
-            // Показываем детали
-            const details = 
-                `📋 Детали записи:\n` +
-                `👤 Имя: ${name}\n` +
-                `📞 Телефон: ${phone}\n` +
-                `🚗 Авто: ${car}\n` +
-                `🛠 Услуга: ${serviceName}\n` +
-                `📅 Дата: ${date}\n` +
-                `⏰ Время: ${selectedTime}\n\n` +
-                `ℹ️ Это тест без Telegram. В реальном Telegram данные уйдут боту.`;
-            
-            console.log(details);
-            
-            // Сбрасываем через 5 секунд
-            setTimeout(() => {
-                resetForm();
-            }, 5000);
-        }, 2000);
-    }
-}
-function sendViaMessage(bookingData) {
-    // ЗАМЕНИТЕ botUsername:
-    const botUsername = 'SBRemontss_bot';  // ДВА "s"!
-    
-    const message = 
-        `📋 НОВАЯ ЗАПИСЬ (WebApp)\n\n` +
-        `👤 Имя: ${bookingData.data.name}\n` +
-        `📞 Телефон: ${bookingData.data.phone}\n` +
-        `🚗 Авто: ${bookingData.data.car}\n` +
-        `🛠 Услуга: ${bookingData.data.service_name}\n` +
-        `📅 Дата: ${bookingData.data.date}\n` +
-        `⏰ Время: ${bookingData.data.time}\n` +
-        `🌐 Язык: ${bookingData.lang}`;
-    
-    const encodedMessage = encodeURIComponent(message);
-    const telegramUrl = `https://t.me/${botUsername}?start=webapp_${Date.now()}`;
-    
-    window.open(telegramUrl, '_blank');
-    
-    return true;
-}
-        }
-
-        // Инициализация
-        document.addEventListener('DOMContentLoaded', function() {
-            // Устанавливаем минимальную дату
-            const today = new Date().toISOString().split('T')[0];
-            document.getElementById('date').min = today;
-            document.getElementById('date').value = today;
-            
-            // Проверяем, в Telegram ли мы
-            if (typeof Telegram !== 'undefined') {
-                tg = Telegram.WebApp;
-                
-                // Развернуть на весь экран
-                tg.expand();
-                tg.ready();
-                
-                // Настраиваем кнопку "Назад"
-                const backBtn = document.getElementById('backBtn');
-                backBtn.onclick = function() {
-                    tg.close();
-                };
-                
-                // Настраиваем кнопку отправки
-                document.getElementById('submitBtn').onclick = submitBooking;
-                
-                // Слушаем сообщения от бота (если нужно)
-                tg.onEvent('messageSent', function(data) {
-                    console.log('Сообщение отправлено:', data);
-                });
+            // Отправляем через Telegram WebApp
+            if (tg && tg.sendData) {
+                try {
+                    // Отправляем данные боту
+                    tg.sendData(JSON.stringify(bookingData));
+                    console.log('✅ Данные отправлены через tg.sendData()');
+                    
+                    // Ждем и показываем успех
+                    setTimeout(() => {
+                        showSuccess();
+                        console.log('✅ Показываем успех');
+                        
+                        // Закрываем через 3 секунды
+                        setTimeout(() => {
+                            if (tg && tg.close) {
+                                tg.close();
+                            } else {
+                                resetForm();
+                            }
+                        }, 3000);
+                    }, 1500);
+                    
+                } catch (error) {
+                    console.error('❌ Ошибка отправки:', error);
+                    showError('Ошибка отправки. Попробуйте еще раз.');
+                    resetForm();
+                }
             } else {
-                // Если не в Telegram, обычная обработка
-                document.getElementById('submitBtn').onclick = submitBooking;
-                document.getElementById('backBtn').onclick = function() {
-                    window.history.back();
-                };
+                // Если не в Telegram
+                console.log('⚠️ Не в Telegram, эмулируем отправку');
+                
+                setTimeout(() => {
+                    showSuccess();
+                    console.log('✅ Эмуляция: запись "отправлена"');
+                    console.log('Данные для бота:', bookingData);
+                    
+                    // Сохраняем в localStorage для отладки
+                    try {
+                        const bookings = JSON.parse(localStorage.getItem('webapp_bookings') || '[]');
+                        bookings.push({
+                            ...bookingData,
+                            saved_at: new Date().toISOString()
+                        });
+                        localStorage.setItem('webapp_bookings', JSON.stringify(bookings));
+                        console.log('💾 Сохранено в localStorage');
+                    } catch (e) {
+                        console.error('Ошибка сохранения в localStorage:', e);
+                    }
+                    
+                    // Сбрасываем через 5 секунд
+                    setTimeout(() => {
+                        resetForm();
+                    }, 5000);
+                }, 1500);
             }
-            
-            // Загружаем язык
-            const savedLang = localStorage.getItem('sbremonts_lang') || 'ru';
-            changeLanguage(savedLang);
-            generateTimeSlots();
-            
-            // Обработчики кнопок языка
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.addEventListener('click', function() {
-                    changeLanguage(this.dataset.lang);
-                    generateTimeSlots();
-                });
-            });
-        });
+        }
     </script>
 </body>
 </html>
